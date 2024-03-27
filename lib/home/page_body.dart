@@ -23,7 +23,6 @@ class _PageBodyState extends State<PageBody> {
     pageController.addListener(() {
       setState(() {
         currPageValue = pageController.page!;
-        
       });
     });
   }
@@ -35,11 +34,72 @@ class _PageBodyState extends State<PageBody> {
 
   @override
   Widget build(BuildContext context) {
+    double _cardWidth = 350;
+    double _cardHeight = 450;
+
+    List<int> _peopleList =  List.generate(20, (index) => index).toList();
+ 
+
     return Container(
-      margin: EdgeInsets.only(top: 40),
-      height: 480,
-      child: CardSwipeDemo()
-    );
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+        height: 550,
+        child: Center(
+            child: Container(
+                width: _cardWidth,
+                height: _cardHeight,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: Stack(
+                  children: _peopleList
+                      .map((i) => SwipeCard(
+                          onSwipeRight: ((finalPosition) => setState(() {
+                            //_isRight = true
+                          })),
+                          child: Container(
+                              width: _cardWidth,
+                              height: _cardHeight,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(
+                                          "https://i.pravatar.cc/250?u=+"+i.toString()))),
+                                child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                        padding: EdgeInsets.only(bottom: 10),
+                                        decoration: BoxDecoration(
+                                            color: Colors.black26),
+                                        child: Text('asdasd '+i.toString()))),
+                              ))))
+                      .toList(),
+                ))));
+
+    /* Container(
+        decoration: BoxDecoration(color: Colors.pink),
+        height: 600,
+        
+        child: Stack(
+          children: List.generate(
+              250,
+              (index) => Center(
+                  child: SwipeCard(
+                      
+                      onSwipeRight: ((finalPosition) => print(
+                          "finaleee position " + finalPosition.toString())),
+                      child: Container(
+                          child: Container(
+                        height: 300,
+                        width: 200,
+                        decoration: BoxDecoration(
+                            color: index.isEven
+                                ? Colors.lightBlue
+                                : Colors.redAccent),
+                      ))))),
+        )); */
   }
 
   Widget _buildPageItem(int index) {
@@ -47,28 +107,29 @@ class _PageBodyState extends State<PageBody> {
     const name = '🇹🇷 Mehmet';
 
     Matrix4 matrix = new Matrix4.identity();
-    
+
     if (index == currPageValue.floor()) {
-      
       var currScale = 1 - (currPageValue - index) * (1 - scaleFactor);
-      var currTrans = _height*(1-currScale)/2;
-      matrix = Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
-      
+      var currTrans = _height * (1 - currScale) / 2;
+      matrix = Matrix4.diagonal3Values(1, currScale, 1)
+        ..setTranslationRaw(0, currTrans, 0);
     } else if (index == currPageValue.floor() + 1) {
-      var currScale = scaleFactor + (currPageValue - index + 1) * (1 - scaleFactor);
-      var currTrans = _height*(1-currScale)/2; 
+      var currScale =
+          scaleFactor + (currPageValue - index + 1) * (1 - scaleFactor);
+      var currTrans = _height * (1 - currScale) / 2;
       matrix = Matrix4.diagonal3Values(1, currScale, 1);
-      matrix = Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
-
-    }else if (index == currPageValue.floor() - 1) {
-      var currScale = 1-(currPageValue-index)*(1-scaleFactor);
-      var currTrans = _height*(1-currScale)/2; 
+      matrix = Matrix4.diagonal3Values(1, currScale, 1)
+        ..setTranslationRaw(0, currTrans, 0);
+    } else if (index == currPageValue.floor() - 1) {
+      var currScale = 1 - (currPageValue - index) * (1 - scaleFactor);
+      var currTrans = _height * (1 - currScale) / 2;
       matrix = Matrix4.diagonal3Values(1, currScale, 1);
-      matrix = Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
-    }else {
-      var currScale=0.8;
-      matrix = Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, _height*(1-scaleFactor)/2, 0);
-
+      matrix = Matrix4.diagonal3Values(1, currScale, 1)
+        ..setTranslationRaw(0, currTrans, 0);
+    } else {
+      var currScale = 0.8;
+      matrix = Matrix4.diagonal3Values(1, currScale, 1)
+        ..setTranslationRaw(0, _height * (1 - scaleFactor) / 2, 0);
     }
 
     var skills = [
