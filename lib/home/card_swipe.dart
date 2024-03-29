@@ -43,7 +43,7 @@ class SwipeCard extends StatefulWidget {
     this.swipe,
     this.animationDuration = 250,
     this.animationCurve = Curves.easeInOut,
-    this.threshold = 0.4,
+    this.threshold = 0.25,
     Key? key,
   }) : super(key: key);
 

@@ -67,8 +67,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               )),
         ),
+        SizedBox(height: 30),
         PageBody(),
-        Expanded(
+        /* Expanded(
             child: Container(
                 alignment: Alignment.bottomCenter,
                 padding: EdgeInsets.only(bottom: 15),
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                       value: 'find', label: Text("Find"), enabled: false),
                   ButtonSegment(
                       value: 'profile', label: Text("Profile"), enabled: false)
-                ], selected: _selected)))
+                ], selected: _selected))) */
       ],
     ));
   }

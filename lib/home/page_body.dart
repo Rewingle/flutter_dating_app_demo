@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_empty/home/card_swipe.dart';
 import 'package:flutter_empty/widgets/big_text.dart';
 import 'package:flutter_empty/widgets/small_text.dart';
+import 'dart:math';
 
 class PageBody extends StatefulWidget {
   const PageBody({super.key});
@@ -12,11 +13,21 @@ class PageBody extends StatefulWidget {
   State<PageBody> createState() => _PageBodyState();
 }
 
+
 class _PageBodyState extends State<PageBody> {
   PageController pageController = PageController(viewportFraction: 0.85);
+
+  final _swipeController = ScrollController();
+
+  final _peopleList = <int>[1, 2, 3];
+  var rng = Random();
+
   var currPageValue = 0.8;
   double scaleFactor = 0.8;
   double _height = 140;
+
+  int _currIndex = 19;
+
   @override
   void initState() {
     super.initState();
@@ -29,77 +40,97 @@ class _PageBodyState extends State<PageBody> {
 
   @override
   void dispose() {
+    _swipeController.dispose();
     pageController.dispose();
+  }
+
+  void _loadMore(){
+if(_peopleList.length == 1){
+  setState(() {
+    _peopleList.insert(0,rng.nextInt(100));
+  });
+}
   }
 
   @override
   Widget build(BuildContext context) {
-    double _cardWidth = 350;
-    double _cardHeight = 450;
+    double cardWidth = 350;
+    double cardHeight = 500;
 
-    List<int> _peopleList =  List.generate(20, (index) => index).toList();
- 
+    List<int> _peopleStack = [];
 
-    return Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+    List<int> swipedRight = [];
+    List<int> swipedLeft = [];
+  
+
+    return SizedBox(
         height: 550,
         child: Center(
-            child: Container(
-                width: _cardWidth,
-                height: _cardHeight,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                child: Stack(
+            child: Column(
+          children: [
+            Container(
+              width: cardWidth,
+              height: cardHeight,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              child: Stack(
                   children: _peopleList
-                      .map((i) => SwipeCard(
-                          onSwipeRight: ((finalPosition) => setState(() {
-                            //_isRight = true
-                          })),
-                          child: Container(
-                              width: _cardWidth,
-                              height: _cardHeight,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                          "https://i.pravatar.cc/250?u=+"+i.toString()))),
-                                child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Container(
-                                        padding: EdgeInsets.only(bottom: 10),
+                      .map((i) => Transform.translate(
+                          offset: Offset(
+                              0,
+                              i == 1
+                                  ? -25
+                                  : i == 2
+                                      ? -15
+                                      : 0),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: SizedBox(
+                              width: i == 1
+                                  ? cardWidth - 40
+                                  : i == 2
+                                      ? cardWidth - 20
+                                      : cardWidth,
+                              child: SwipeCard(
+                                  onPositionChanged: (details) =>
+                                      {print('Details: $details')},
+                                  onSwipeEnd: (position, details) =>
+                                      setState(() {
+                                        _peopleList.removeLast();
+                                        _peopleList.insert(0,rng.nextInt(100));
+                                       
+                                      }),
+                                  onSwipeRight: ((finalPosition) =>
+                                      setState(() {
+                                        //swipedRight.add(i);
+                                      })),
+                                  onSwipeLeft: ((finalPosition) => setState(() {
+                                        //swipedLeft.add(i);
+                                      })),
+                                  child: Container(
+                                      width: cardWidth,
+                                      height: cardHeight,
+                                      margin: EdgeInsets.only(
+                                          top: _currIndex == i ? 10 : 0),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: Container(
                                         decoration: BoxDecoration(
-                                            color: Colors.black26),
-                                        child: Text('asdasd '+i.toString()))),
-                              ))))
-                      .toList(),
-                ))));
-
-    /* Container(
-        decoration: BoxDecoration(color: Colors.pink),
-        height: 600,
-        
-        child: Stack(
-          children: List.generate(
-              250,
-              (index) => Center(
-                  child: SwipeCard(
-                      
-                      onSwipeRight: ((finalPosition) => print(
-                          "finaleee position " + finalPosition.toString())),
-                      child: Container(
-                          child: Container(
-                        height: 300,
-                        width: 200,
-                        decoration: BoxDecoration(
-                            color: index.isEven
-                                ? Colors.lightBlue
-                                : Colors.redAccent),
-                      ))))),
-        )); */
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: NetworkImage(
+                                                    "https://i.pravatar.cc/250?u=+$i"))),
+                                      ))),
+                            ),
+                          )))
+                      .toList()),
+            ),
+            Text('data $_peopleList')
+          ],
+        )));
   }
 
   Widget _buildPageItem(int index) {
