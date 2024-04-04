@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,43 +15,53 @@ class PageBody extends StatefulWidget {
   State<PageBody> createState() => _PageBodyState();
 }
 
-
 class _PageBodyState extends State<PageBody> {
   PageController pageController = PageController(viewportFraction: 0.85);
 
   final _swipeController = ScrollController();
 
-  final _peopleList = <int>[1, 2, 3];
+  final _peopleList = <int>[1,1,1];
   var rng = Random();
+
+  //final StreamController<List<int>> controller = StreamController<List<int>>();
+
+  //Stream<List<int>> get userStream => controller.stream;
+
+  final StreamController<List<int>> _streamController =
+      StreamController<List<int>>();
+
+  Stream<List<int>> get userStream => _streamController.stream;
+
+  void _removeUser() {
+    _peopleList.removeLast();
+    _streamController.sink.add(_peopleList);
+    print('USER REMOVED');
+  }
+
+  void _loadUsers() {
+    _peopleList.addAll([1,1,1]);
+    _streamController.sink.add(_peopleList);
+    print('LOADED USERS');
+  }
 
   var currPageValue = 0.8;
   double scaleFactor = 0.8;
   double _height = 140;
 
-  int _currIndex = 19;
-
   @override
   void initState() {
+    
     super.initState();
-    pageController.addListener(() {
+   /*  pageController.addListener(() {
       setState(() {
         currPageValue = pageController.page!;
       });
-    });
+    }); */
   }
 
   @override
   void dispose() {
-    _swipeController.dispose();
-    pageController.dispose();
-  }
-
-  void _loadMore(){
-if(_peopleList.length == 1){
-  setState(() {
-    _peopleList.insert(0,rng.nextInt(100));
-  });
-}
+    //_streamController.close();
   }
 
   @override
@@ -57,83 +69,56 @@ if(_peopleList.length == 1){
     double cardWidth = 350;
     double cardHeight = 500;
 
-    List<int> _peopleStack = [];
-
     List<int> swipedRight = [];
     List<int> swipedLeft = [];
-  
 
     return SizedBox(
-        height: 550,
         child: Center(
-            child: Column(
-          children: [
-            Container(
-              width: cardWidth,
-              height: cardHeight,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              child: Stack(
-                  children: _peopleList
-                      .map((i) => Transform.translate(
-                          offset: Offset(
-                              0,
-                              i == 1
-                                  ? -25
-                                  : i == 2
-                                      ? -15
-                                      : 0),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: SizedBox(
-                              width: i == 1
-                                  ? cardWidth - 40
-                                  : i == 2
-                                      ? cardWidth - 20
-                                      : cardWidth,
-                              child: SwipeCard(
-                                  onPositionChanged: (details) =>
-                                      {print('Details: $details')},
-                                  onSwipeEnd: (position, details) =>
-                                      setState(() {
-                                        _peopleList.removeLast();
-                                        _peopleList.insert(0,rng.nextInt(100));
-                                       
-                                      }),
-                                  onSwipeRight: ((finalPosition) =>
-                                      setState(() {
-                                        //swipedRight.add(i);
-                                      })),
-                                  onSwipeLeft: ((finalPosition) => setState(() {
-                                        //swipedLeft.add(i);
-                                      })),
-                                  child: Container(
-                                      width: cardWidth,
-                                      height: cardHeight,
-                                      margin: EdgeInsets.only(
-                                          top: _currIndex == i ? 10 : 0),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: NetworkImage(
-                                                    "https://i.pravatar.cc/250?u=+$i"))),
-                                      ))),
-                            ),
-                          )))
-                      .toList()),
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            StreamBuilder<List<int>>(
+              stream: userStream,
+              initialData: _peopleList,
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+                print(snapshot.data);
+
+                if (snapshot.data!.length == 0) {
+                  _loadUsers();
+                } 
+
+                return Stack(
+                    children: snapshot.data!
+                        .map(
+                          (index) => /* Container(width: 100,height: 100,color: Colors.red,child: FloatingActionButton(onPressed: _removeUser)) */  SwipeCard(
+                              onSwipeEnd: (position, details) => setState(() {
+                                    _removeUser();
+                                  }),
+                              child: Container(
+                                width: 350,
+                                height: 500,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(
+                                              "https://i.pravatar.cc/250?u=+$index"))),
+                                ),
+                              )), 
+                          //Container(width: 200,height: 200,color: Colors.amberAccent,child: FloatingActionButton.small(onPressed: _removeUser))
+                        )
+                        .toList());
+              },
             ),
-            Text('data $_peopleList')
-          ],
-        )));
+          ]),
+    ));
   }
 
-  Widget _buildPageItem(int index) {
+/*   Widget _buildPageItem(int index) {
     const location = '10km away';
     const name = '🇹🇷 Mehmet';
 
@@ -251,7 +236,12 @@ if(_peopleList.length == 1){
                                                               right: BorderSide(color: Color(0xFF69c5df))),
                                                           borderRadius: BorderRadius.circular(15)),
                                                       child: SmallText(text: title)))
-                                                  .toList()))))
+                                                  .toList())))),
+                              FloatingActionButton(
+                                onPressed: _incrementCounter,
+                                tooltip: 'Increment',
+                                child: const Icon(Icons.add),
+                              ),
                             ],
                           )),
                       Column(
@@ -266,5 +256,5 @@ if(_peopleList.length == 1){
         ),
       ]),
     );
-  }
+  } */
 }

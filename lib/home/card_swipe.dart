@@ -73,7 +73,7 @@ class SwipeCardState extends State<SwipeCard> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return Container(width: 350,height: 500,child: LayoutBuilder(
       builder: (context, constraints) => GestureDetector(
         onPanStart: _onPanStart,
         onPanEnd: _onPanEnd,
@@ -90,7 +90,7 @@ class SwipeCardState extends State<SwipeCard> {
           ],
         ),
       ),
-    );
+    )); 
   }
 
   @override
@@ -124,7 +124,6 @@ class SwipeCardState extends State<SwipeCard> {
     // Get screen dimensions.
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-
     final potentialX = _positionX + (details.velocity.pixelsPerSecond.dx * widget.threshold);
     final potentialY = _positionY + (details.velocity.pixelsPerSecond.dy * widget.threshold);
 
