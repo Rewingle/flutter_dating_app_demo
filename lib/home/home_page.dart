@@ -10,6 +10,59 @@ import 'package:flutter_empty/widgets/small_text.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class Album {
+  int? userId;
+  int? id;
+  String? title;
+
+  Album({
+    this.userId,
+    this.id,
+    this.title,
+  });
+
+  Album.fromJson(Map<String, dynamic> json) {
+    userId = json['userId'];
+    id = json['id'];
+    title = json['title'];
+/*     return switch (json) {
+      {
+        'userId': int userId,
+        'id': int id,
+        'title': String title,
+      } =>
+        Album(
+          userId: userId,
+          id: id,
+          title: title,
+        ),
+      _ => throw const FormatException('Failed to load album.'),
+    }; */
+  }
+}
+
+Future<List<Album>> fetchAlbum() async {
+  final response =
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    final List body = json.decode(response.body);
+    return body
+        .map((e) => Album.fromJson(e))
+        .toList(); /* List<Album>.fromJson(jsonDecode(response.body) as Map<String, dynamic>); */
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load album');
+  }
+}
+
+Future<List<Album>> albumsFuture = fetchAlbum();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,39 +73,40 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   final CardSwiperController controller = CardSwiperController();
 
-  final StreamController<List<int>> _streamController = StreamController<List<int>>();
+/*   final StreamController<List<int>> _streamController =
+      StreamController<List<int>>();
 
-  Stream<List<int>> get userStream => _streamController.stream;
-
+  Stream<List<int>> get userStream => _streamController.stream; */
 
   List<int> _leftCounter = [];
   List<int> _rightCounter = [];
 
   List<int> _people = [1, 2, 3];
+/* 
+  FutureBuilder<Album> cards = FutureBuilder<Album>(
+              future: futureAlbum,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color:  Colors.pink),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('${snapshot.error}');
+                }
+                return const CircularProgressIndicator();
+              });//[
+       */
 
-  List<Container> cards = //[
-    List<Container>.generate(5, (index) => Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20), color: index.isEven?Colors.blue:Colors.pink),
-      child: Text(index.toString()),
-    ));
-    
-    /* Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20), color: Colors.red),
-      child: const Text('2'),
-    ),
-    Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20), color: Colors.purple),
-      child: const Text('3'),
-    )
-  ]; */
   @override
   void dispose() {
     controller.dispose();
@@ -143,14 +197,35 @@ class _HomePageState extends State<HomePage> {
                   _onSwipe(previousIndex, currentIndex, direction),
               controller: controller,
               numberOfCardsDisplayed: 2,
-              cardsCount: cards.length,
+              cardsCount: 3,
               cardBuilder:
                   (context, index, percentThresholdX, percentThresholdY) =>
-                      cards[index],
+                      Stack(
+                children: [
+                  FutureBuilder<List<Album>>(
+                      future: albumsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final albums = snapshot.data!;
+                          return Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color:
+                                    index.isEven ? Colors.blue : Colors.pink),
+                            child: Container(
+                                child: Text(albums.title.toString())),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text('${snapshot.error}');
+                        }
+                        return const CircularProgressIndicator();
+                      }),
+                ],
+              ),
             ),
           ),
         ),
-        
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
