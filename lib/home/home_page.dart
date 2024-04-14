@@ -17,44 +17,28 @@ class Album {
   int? userId;
   int? id;
   String? title;
+  String? url;
 
-  Album({
-    this.userId,
-    this.id,
-    this.title,
-  });
+  Album({this.userId, this.id, this.title, this.url});
 
   Album.fromJson(Map<String, dynamic> json) {
-    userId = json['userId'];
+    userId = json['albumId'];
     id = json['id'];
     title = json['title'];
-/*     return switch (json) {
-      {
-        'userId': int userId,
-        'id': int id,
-        'title': String title,
-      } =>
-        Album(
-          userId: userId,
-          id: id,
-          title: title,
-        ),
-      _ => throw const FormatException('Failed to load album.'),
-    }; */
+    url = json['url'];
   }
 }
 
 Future<List<Album>> fetchAlbum() async {
   final response =
-      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     final List body = json.decode(response.body);
-    return body
-        .map((e) => Album.fromJson(e))
-        .toList(); /* List<Album>.fromJson(jsonDecode(response.body) as Map<String, dynamic>); */
+
+    return body.map((e) => Album.fromJson(e)).toList();
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
@@ -72,7 +56,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   void initState() {
     super.initState();
@@ -80,15 +63,9 @@ class _HomePageState extends State<HomePage> {
 
   final CardSwiperController controller = CardSwiperController();
 
-/*   final StreamController<List<int>> _streamController =
-      StreamController<List<int>>();
-
-  Stream<List<int>> get userStream => _streamController.stream; */
-
   List<int> _leftCounter = [];
   List<int> _rightCounter = [];
 
-  List<int> _people = [1, 2, 3];
 /* 
   FutureBuilder<Album> cards = FutureBuilder<Album>(
               future: futureAlbum,
@@ -123,6 +100,7 @@ class _HomePageState extends State<HomePage> {
     switch (direction.name) {
       case 'left':
         debugPrint('LEEEEEEEFTT');
+        debugPrint(albumsFuture.toString());
         setState(() {
           _leftCounter = List<int>.from(_leftCounter)..add(previousIndex);
         });
@@ -189,8 +167,75 @@ class _HomePageState extends State<HomePage> {
         SizedBox(height: 10),
         Flexible(
           child: SizedBox(
-            height: 550,
-            child: CardSwiper(
+              height: 550,
+              child: FutureBuilder<List<Album>>(
+                future: albumsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<Album> albums = snapshot.data!;
+
+                    List<Container> cards = albums
+                        .map(
+                          (album) => Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.pink),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(album.url.toString(),
+                                          fit: BoxFit.cover, height: 550)),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.14,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                              bottomRight: Radius.circular(15),
+                                              bottomLeft: Radius.circular(15)),
+                                          color: Colors.black.withOpacity(0.3)),
+                                          child: Padding(padding: EdgeInsets.symmetric(horizontal: 24,vertical: 8),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(album.title!.toString(),style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,),
+                                              //Text('album.title!.toString()',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))
+                                            ],
+                                          ),),
+                                    ),
+                                    
+                                  )
+                                ],
+                              )),
+                        )
+                        .toList();
+
+                    return CardSwiper(
+                        backCardOffset: Offset(0, -40),
+                        duration: Duration(milliseconds: 100),
+                        onSwipe: (previousIndex, currentIndex, direction) =>
+                            _onSwipe(previousIndex, currentIndex, direction),
+                        controller: controller,
+                        numberOfCardsDisplayed: 2,
+                        allowedSwipeDirection: AllowedSwipeDirection.only(
+                            left: true, right: true, up: true),
+                        cardsCount: cards.length,
+                        cardBuilder: (context,
+                                index,
+                                horizontalOffsetPercentage,
+                                verticalOffsetPercentage) =>
+                            cards[index]);
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  return const CircularProgressIndicator();
+                },
+              ) /* CardSwiper(
               backCardOffset: Offset(0, -40),
               duration: Duration(milliseconds: 100),
               onSwipe: (previousIndex, currentIndex, direction) =>
@@ -223,8 +268,8 @@ class _HomePageState extends State<HomePage> {
                       }),
                 ],
               ),
-            ),
-          ),
+            ), */
+              ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
