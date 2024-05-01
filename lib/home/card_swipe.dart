@@ -1,209 +1,217 @@
 import 'dart:async';
 import 'dart:math' as math;
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:flutter_empty/widgets/big_text.dart';
+import 'package:flutter_empty/widgets/small_text.dart';
+
+class Album {
+  int? userId;
+  int? id;
+  String? title;
+  String? url;
+
+  Album({this.userId, this.id, this.title, this.url});
+
+  Album.fromJson(Map<String, dynamic> json) {
+    userId = json['albumId'];
+    id = json['id'];
+    title = json['title'];
+    url = json['url'];
+  }
+}
+
+Future<List<Album>> fetchAlbum() async {
+  final response =
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    final List body = json.decode(response.body);
+
+    return body.map((e) => Album.fromJson(e)).toList();
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load album');
+  }
+}
+
+Future<List<Album>> albumsFuture = fetchAlbum();
 
 class SwipeCard extends StatefulWidget {
-  final Widget child;
-
-  final void Function(DragStartDetails details)? onSwipeStart;
-
-  final void Function(DragUpdateDetails details)? onPositionChanged;
-
-  final void Function(Offset position, DragEndDetails details)? onSwipeCancel;
-
-  final void Function(Offset position, DragEndDetails details)? onSwipeEnd;
-
-  final void Function(Offset finalPosition)? onSwipeRight;
-
-  final void Function(Offset finalPosition)? onSwipeLeft;
-
-  final void Function(Offset finalPosition)? onSwipeUp;
-
-  final void Function(Offset finalPosition)? onSwipeDown;
-
-  final Stream<double>? swipe;
-
-  final int animationDuration;
-
-  final Curve animationCurve;
-
-  final double threshold;
-
-  const SwipeCard({
-    required this.child,
-    this.onSwipeRight,
-    this.onSwipeLeft,
-    this.onSwipeDown,
-    this.onSwipeUp,
-    this.onPositionChanged,
-    this.onSwipeStart,
-    this.onSwipeCancel,
-    this.onSwipeEnd,
-    this.swipe,
-    this.animationDuration = 250,
-    this.animationCurve = Curves.easeInOut,
-    this.threshold = 0.25,
-    Key? key,
-  }) : super(key: key);
-
   @override
   SwipeCardState createState() => SwipeCardState();
 }
 
 class SwipeCardState extends State<SwipeCard> {
-  double _positionY = 0;
-  double _positionX = 0;
-
-  int _duration = 0;
-
-  StreamSubscription? _swipeSub;
-
   @override
   void initState() {
     super.initState();
-
-    if (widget.swipe != null) {
-      _swipeSub = widget.swipe?.listen((angle) {
-        _swipeSub?.cancel();
-        _animate(angle);
-      });
-    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(width: 350,height: 500,child: LayoutBuilder(
-      builder: (context, constraints) => GestureDetector(
-        onPanStart: _onPanStart,
-        onPanEnd: _onPanEnd,
-        onPanUpdate: _onPanUpdate,
-        child: Stack(
-          
-          clipBehavior: Clip.none,
-          children: [
-            AnimatedPositioned(
-                duration: Duration(milliseconds: _duration),
-                top: _positionY,
-                left: _positionX,
-                child: Container(constraints: BoxConstraints(maxHeight: constraints.maxHeight, maxWidth: constraints.maxWidth), child: widget.child))
-          ],
-        ),
-      ),
-    )); 
-  }
+  final CardSwiperController controller = CardSwiperController();
+
+  List<int> _leftCounter = [];
+  List<int> _rightCounter = [];
+ 
 
   @override
   void dispose() {
+    controller.dispose();
     super.dispose();
-
-    _swipeSub?.cancel();
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
-    setState(() {
-      _positionX += details.delta.dx;
-      _positionY += details.delta.dy;
-    });
+  bool _onSwipe(
+    int previousIndex,
+    int? currentIndex,
+    CardSwiperDirection direction,
+  ) {
+    debugPrint(
+        'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top');
+    switch (direction.name) {
+      case 'left':
+        debugPrint('LEEEEEEEFTT');
+        debugPrint(albumsFuture.toString());
+        setState(() {
+          _leftCounter = List<int>.from(_leftCounter)..add(previousIndex);
+        });
 
-    widget.onPositionChanged?.call(details);
+      case 'right':
+        debugPrint('RIGGHTTTTTTTT');
+        setState(() {
+          _rightCounter = List<int>.from(_rightCounter)..add(previousIndex);
+        });
+    }
+    return true;
   }
 
-  void _onPanStart(DragStartDetails details) {
-    setState(() {
-      _duration = 0;
-    });
+  void _onDirectionChange(double horizontalDirection){}
 
-    widget.onSwipeStart?.call(details);
-  }
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Flexible(
+          child: SizedBox(
+              height: 550,
+              child: FutureBuilder<List<Album>>(
+                future: albumsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<Album> albums = snapshot.data!;
 
-  void _onPanEnd(DragEndDetails details) {
-    var newX = 0.0;
-    var newY = 0.0;
+                    List<Container> cards = albums
+                        .map(
+                          (album) => Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.pink),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(album.url.toString(),
+                                          fit: BoxFit.cover, height: 550)),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.14,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                              bottomRight: Radius.circular(15),
+                                              bottomLeft: Radius.circular(15)),
+                                          color: Colors.black.withOpacity(0.3)),
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 24, vertical: 8),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              album.title!.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            //Text('album.title!.toString()',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              )),
+                        )
+                        .toList();
 
-    // Get screen dimensions.
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-    final potentialX = _positionX + (details.velocity.pixelsPerSecond.dx * widget.threshold);
-    final potentialY = _positionY + (details.velocity.pixelsPerSecond.dy * widget.threshold);
-
-    final currentPosition = Offset(_positionX, _positionY);
-
-    final shouldSwipe = potentialX.abs() >= width || potentialY <= -height;
-
-    if (shouldSwipe) {
-      // horizontal speed or vertical speed is enough to make the card disappear in _duration ms.
-      newX = potentialX;
-      newY = potentialY;
-
-      widget.onSwipeEnd?.call(currentPosition, details);
-    } else {
-      newX = 0;
-      newY = 0;
-
-      widget.onSwipeCancel?.call(currentPosition, details);
-    }
-
-    setState(() {
-      _positionX = newX;
-      _positionY = newY;
-      _duration = widget.animationDuration;
-    });
-
-    if (shouldSwipe) {
-      Future.delayed(Duration(milliseconds: widget.animationDuration), () {
-        // Clock wise radian angle of the velocity
-        final angle = details.velocity.pixelsPerSecond.direction;
-        final finalPosition = Offset(newX, newY);
-        if (angle.abs() <= (math.pi / 4)) {
-          widget.onSwipeRight?.call(finalPosition);
-        } else if (angle.abs() > (3 * math.pi / 4)) {
-          widget.onSwipeLeft?.call(finalPosition);
-        } else if (angle >= 0) {
-          widget.onSwipeDown?.call(finalPosition);
-        } else {
-          widget.onSwipeUp?.call(finalPosition);
-        }
-      });
-    }
-  }
-
-  void _animate(double? angle) {
-    if (angle == null || angle < -math.pi || angle > math.pi) {
-      throw Exception('Angle must be between -π and π (inclusive).');
-    }
-
-    widget.onSwipeStart?.call(DragStartDetails());
-
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-
-    // Horizontal distance to arrive to the final X.
-    double remainingX;
-    // Vertical distance to arrive to the final Y.
-    double remainingY;
-
-    if (angle.abs() <= math.pi / 4) {
-      // Swiping right
-      remainingX = width - _positionX;
-      remainingY = 0;
-    } else if (angle.abs() > 3 * math.pi / 4) {
-      // Swiping left
-      remainingX = -width - _positionX;
-      remainingY = 0;
-    } else if (angle >= 0) {
-      // Swiping down
-      remainingX = 0;
-      remainingY = height - _positionY;
-    } else {
-      // Swiping up
-      remainingX = 0;
-      remainingY = -height - _positionY;
-    }
-
-    // Calculating velocity so the card arrives at it's final position when the animation ends.
-    final velocity = Velocity(pixelsPerSecond: Offset(remainingX / widget.threshold, remainingY / widget.threshold));
-    final details = DragEndDetails(velocity: velocity);
-    _onPanEnd(details);
+                    return CardSwiper(
+                        backCardOffset: Offset(0, -40),
+                        duration: Duration(milliseconds: 100),
+                        isLoop: false,
+                        onSwipe: (previousIndex, currentIndex, direction) =>
+                            _onSwipe(previousIndex, currentIndex, direction),
+                        controller: controller,
+                        numberOfCardsDisplayed: 2,
+                        allowedSwipeDirection: AllowedSwipeDirection.only(
+                            left: true, right: true, up: true),
+                        cardsCount: cards.length,
+                        cardBuilder: (context,
+                                index,
+                                horizontalOffsetPercentage,
+                                verticalOffsetPercentage) =>
+                            cards[index]);
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  return const CircularProgressIndicator();
+                },
+              )),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+                onPressed: () => controller.swipe(CardSwiperDirection.left),
+                style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(20),
+                    backgroundColor: Colors.white),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.black,
+                  size: 32,
+                )),
+            FloatingActionButton(
+              onPressed: controller.undo,
+              child: const Icon(Icons.rotate_left),
+            ),
+            FloatingActionButton(
+              onPressed: () => controller.swipe(CardSwiperDirection.top),
+              child: const Icon(Icons.keyboard_arrow_up),
+            ),
+            ElevatedButton(
+                onPressed: () => controller.swipe(CardSwiperDirection.right),
+                style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(20),
+                    backgroundColor: Colors.white),
+                child: const Icon(Icons.favorite, color: Colors.red, size: 32)),
+          ],
+        ),
+        Text('Left ${_leftCounter.length}'),
+        Text('Right ${_rightCounter.length}'),
+        
+      ],
+    );
   }
 }
