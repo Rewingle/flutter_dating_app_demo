@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_empty/home/card_swipe.dart';
 import 'package:flutter_empty/home/card_swipe.dart';
@@ -10,7 +11,7 @@ import 'package:flutter_empty/widgets/small_text.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-//import 'package:flutter_empty/pages/profile.dart';
+import 'package:flutter_empty/pages/profile.dart';
 import 'package:http/http.dart' as http;
 
 import 'dart:convert';
@@ -28,7 +29,7 @@ Future fetchUsers() async {
   }
 }
 
-Future usersFuture = fetchUsers();
+//Future usersFuture = fetchUsers();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -81,82 +82,77 @@ class _HomePageState extends State<HomePage> {
     return true;
   }
 
+  int currentPageIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        bottomNavigationBar: NavigationBar(
+            animationDuration: const Duration(milliseconds: 300),
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            destinations: [
+              NavigationDestination(icon: Icon(Icons.home), label: 'Swipe'),
+              NavigationDestination(
+                  icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
+              NavigationDestination(
+                  icon: Icon(Icons.explore), label: 'Discover'),
+              NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+            ],
+            selectedIndex: currentPageIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                currentPageIndex = index;
+              });
+            }),
         appBar: AppBar(
           title: const Text('Dating App'),
         ),
-        body: Column(
-          children: [
-             ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()));
-              },
-              child: Text('Profile'),
+        body: <Widget>[
+          SwipeCard(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 1'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 2'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+              ],
             ),
-            
-            Flexible(child: SwipeCard()),
-
-            /*  BottomNavigationBar(
-          
-          onTap: (index) {
-            if (index == 0) {
-              Navigator.pushNamed(context, '/home');
-            } else if (index == 1) {
-              Navigator.pushNamed(context, '/search');
-            } else if (index == 2) {
-              Navigator.pushNamed(context, '/favorite');
-            } else if (index == 3) {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()),);
-            }
-          },
-      /*     currentIndex: _selectedIndex,
-          onTap: _onItemTapped, */
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.grey,size: 30),
-              label: '1',
-              backgroundColor: Colors.black
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 1'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 2'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search, color: Colors.grey,size: 30),
-              label: '2',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite, color: Colors.grey,size: 30),
-              label: '3',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person, color: Colors.grey,size: 30),
-              label: '4',
-              
-            ),
-          ],
-        ) */
-          ],
-        ));
+          ),
+          ProfilePage()
+        ][currentPageIndex]);
   }
 }
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Second Route'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Go back!'),
-        ),
-      ),
-    );
-  }
-}

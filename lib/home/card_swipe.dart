@@ -57,7 +57,7 @@ class SwipeCardState extends State<SwipeCard> {
 
   List<int> _leftCounter = [];
   List<int> _rightCounter = [];
- 
+  List<int> _discarded = [];
 
   @override
   void dispose() {
@@ -89,13 +89,14 @@ class SwipeCardState extends State<SwipeCard> {
     return true;
   }
 
-  void _onDirectionChange(double horizontalDirection){}
+  void _onDirectionChange(double horizontalDirection) {}
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Flexible(
+          
           child: SizedBox(
               height: 550,
               child: FutureBuilder<List<Album>>(
@@ -192,10 +193,12 @@ class SwipeCardState extends State<SwipeCard> {
                   size: 32,
                 )),
             FloatingActionButton(
+              heroTag: 'undo',
               onPressed: controller.undo,
               child: const Icon(Icons.rotate_left),
             ),
             FloatingActionButton(
+              heroTag: 'top',
               onPressed: () => controller.swipe(CardSwiperDirection.top),
               child: const Icon(Icons.keyboard_arrow_up),
             ),
@@ -208,9 +211,8 @@ class SwipeCardState extends State<SwipeCard> {
                 child: const Icon(Icons.favorite, color: Colors.red, size: 32)),
           ],
         ),
-        Text('Left ${_leftCounter.length}'),
-        Text('Right ${_rightCounter.length}'),
-        
+      /*   Text('Left ${_leftCounter.length}'),
+        Text('Right ${_rightCounter.length}'), */
       ],
     );
   }
