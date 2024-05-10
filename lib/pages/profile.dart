@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_empty/widgets/big_text.dart';
+import 'package:flutter_empty/widgets/info_card.dart';
 
-
-Future fetchProfile() async {
+/* Future fetchProfile() async {
   final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/match'));
 
 }
-
+ */
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -16,28 +17,16 @@ class ProfilePage extends StatelessWidget {
 
     return Column(
       children: [
+        Align(alignment: Alignment.centerLeft,child: Padding(padding: EdgeInsets.only(left: 20),child: BigText(text: 'Welcome back'))),
         SizedBox(height: 10),
         Center(
           child: SizedBox(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: Stack(children: [
+              
                 Container(
-                    height: 300,
-                    width: (MediaQuery.of(context).size.width.floor() - 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red,
-                          spreadRadius: 60,
-                          blurRadius: 10,
-                          offset: Offset(0, 300),
-                        ),
-                      ],
-                    )),
-                Container(
-                  height: 300,
+                  height: 250,
                   width: (MediaQuery.of(context).size.width.floor() - 20),
                   alignment: Alignment.bottomCenter,
                   decoration: BoxDecoration(
@@ -54,15 +43,10 @@ class ProfilePage extends StatelessWidget {
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black,
-                          spreadRadius: 16.0,
+                          spreadRadius: 32.0,
                           blurRadius: 40.0,
                         ),
-                        /*  BoxShadow(
-                            color: Colors.white70,
-                            spreadRadius: -5.0,
-                            blurRadius: 20.0,
-                            offset: Offset(0, -20),
-                          ), */
+                  
                       ],
                     ),
                     child: Stack(children: [
@@ -72,13 +56,11 @@ class ProfilePage extends StatelessWidget {
                           padding: EdgeInsets.only(left: 20.0),
                           child: Row(
                             children: [
-                              Container(
-                                child: Text(' ${name} ',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 32.0,
-                                        fontWeight: FontWeight.bold)),
-                              ),
+                              Text(' ${name} ',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32.0,
+                                      fontWeight: FontWeight.bold)),
                               Padding(
                                 padding: EdgeInsets.only(top:9),
                                 child: Text(' ${age} ',
@@ -93,16 +75,7 @@ class ProfilePage extends StatelessWidget {
                       )
                     ]),
                   ),
-                  /* ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.network(
-                          'https://picsum.photos/${MediaQuery.of(context).size.width.floor() - 20}/300',
-                          fit: BoxFit.cover,
-                        ),
-                      ) ,
-                       Padding(
-                        padding: EdgeInsets.only(bottom: 10.0),
-                        child: Center(child: Text('ASADASDASD'))),  */
+            
                 )
               ]),
             ),

@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:math' as math;
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:flutter_empty/widgets/big_text.dart';
+/* import 'package:flutter_empty/widgets/big_text.dart';
 import 'package:flutter_empty/widgets/small_text.dart';
-
+ */
 class Album {
   int? userId;
   int? id;
@@ -57,7 +57,7 @@ class SwipeCardState extends State<SwipeCard> {
 
   List<int> _leftCounter = [];
   List<int> _rightCounter = [];
-  List<int> _discarded = [];
+  //List<int> _discarded = [];
 
   @override
   void dispose() {

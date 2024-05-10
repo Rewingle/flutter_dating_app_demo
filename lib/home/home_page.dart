@@ -105,7 +105,12 @@ class _HomePageState extends State<HomePage> {
               });
             }),
         appBar: AppBar(
-          title: const Text('Dating App'),
+          title: Row(
+            children: [
+              const Icon(Icons.favorite),
+              const Text('Meely')
+            ],
+          ),
         ),
         body: <Widget>[
           SwipeCard(),
