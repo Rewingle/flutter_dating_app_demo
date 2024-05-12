@@ -136,7 +136,7 @@ class SwipeCardState extends State<SwipeCard> {
                                           color: Colors.black.withOpacity(0.3)),
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 8),
+                                            horizontal: 12, vertical: 8),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
