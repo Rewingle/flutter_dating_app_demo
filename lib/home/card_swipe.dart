@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+
 /* import 'package:flutter_empty/widgets/big_text.dart';
 import 'package:flutter_empty/widgets/small_text.dart';
  */
@@ -93,12 +94,14 @@ class SwipeCardState extends State<SwipeCard> {
 
   @override
   Widget build(BuildContext context) {
+    final cardHeight = MediaQuery.of(context).size.height * 0.8;
+    final cardWidth = MediaQuery.of(context).size.width * 0.2;
     return Column(
       children: [
+        SizedBox(height: 20),
         Flexible(
-          
           child: SizedBox(
-              height: 550,
+              height: cardHeight,
               child: FutureBuilder<List<Album>>(
                 future: albumsFuture,
                 builder: (context, snapshot) {
@@ -117,13 +120,14 @@ class SwipeCardState extends State<SwipeCard> {
                                   ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
                                       child: Image.network(album.url.toString(),
-                                          fit: BoxFit.cover, height: 550)),
+                                          fit: BoxFit.cover,
+                                          height: cardHeight)),
                                   Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Container(
                                       height:
                                           MediaQuery.of(context).size.height *
-                                              0.14,
+                                              0.2,
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.only(
@@ -132,17 +136,100 @@ class SwipeCardState extends State<SwipeCard> {
                                           color: Colors.black.withOpacity(0.3)),
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: 24, vertical: 8),
+                                            horizontal: 16, vertical: 8),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              album.title!.toString(),
-                                              style: TextStyle(
-                                                  fontSize: 22,
-                                                  fontWeight: FontWeight.bold),
-                                              overflow: TextOverflow.ellipsis,
+                                            Expanded(
+                                              child: Text(
+                                                album.title!.toString(),
+                                                style: TextStyle(
+                                                    fontSize: 22,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: () =>
+                                                        controller.swipe(
+                                                            CardSwiperDirection
+                                                                .left),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                            shape:
+                                                                CircleBorder(),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    18),
+                                                            backgroundColor:
+                                                                Colors.white),
+                                                    child: const Icon(
+                                                      Icons.close,
+                                                      color: Colors.black,
+                                                      size: 36,
+                                                    )),
+                                                
+                                                SizedBox(width: 20),
+                                                
+                                                ElevatedButton(
+                                                  onPressed: controller.undo,
+                                                  style: ElevatedButton
+                                                        .styleFrom(
+                                                            shape:
+                                                                CircleBorder(),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    12),
+                                                            backgroundColor:
+                                                                Colors.white),
+                                                  child: const Icon(
+                                                      Icons.rotate_left,size: 30),
+                                                ),
+                                                SizedBox(width: 4),
+                                                ElevatedButton(
+                                                  onPressed: () => controller
+                                                      .swipe(CardSwiperDirection
+                                                          .top),
+                                                          style: ElevatedButton
+                                                        .styleFrom(
+                                                            shape:
+                                                                CircleBorder(),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    12),
+                                                            backgroundColor:
+                                                                Colors.white),
+                                                  child: const Icon(
+                                                      Icons.keyboard_arrow_up,size:30),
+                                                ),
+                                                
+                                                SizedBox(width: 20),
+                                                
+                                                ElevatedButton(
+                                                    onPressed: () =>
+                                                        controller.swipe(
+                                                            CardSwiperDirection
+                                                                .right),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                            shape:
+                                                                CircleBorder(),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    18),
+                                                            backgroundColor:
+                                                                Colors.white),
+                                                    child: const Icon(
+                                                        Icons.favorite,
+                                                        color: Colors.red,
+                                                        size: 36)),
+                                              ],
                                             ),
                                             //Text('album.title!.toString()',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))
                                           ],
@@ -178,40 +265,8 @@ class SwipeCardState extends State<SwipeCard> {
                 },
               )),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-                onPressed: () => controller.swipe(CardSwiperDirection.left),
-                style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(20),
-                    backgroundColor: Colors.white),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.black,
-                  size: 32,
-                )),
-            FloatingActionButton(
-              heroTag: 'undo',
-              onPressed: controller.undo,
-              child: const Icon(Icons.rotate_left),
-            ),
-            FloatingActionButton(
-              heroTag: 'top',
-              onPressed: () => controller.swipe(CardSwiperDirection.top),
-              child: const Icon(Icons.keyboard_arrow_up),
-            ),
-            ElevatedButton(
-                onPressed: () => controller.swipe(CardSwiperDirection.right),
-                style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(20),
-                    backgroundColor: Colors.white),
-                child: const Icon(Icons.favorite, color: Colors.red, size: 32)),
-          ],
-        ),
-      /*   Text('Left ${_leftCounter.length}'),
+
+        /*   Text('Left ${_leftCounter.length}'),
         Text('Right ${_rightCounter.length}'), */
       ],
     );

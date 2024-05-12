@@ -1,6 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_empty/home/home_page.dart';
+import 'package:dating_app/home/home_page.dart';
 import 'package:provider/provider.dart';
 
 void main() {

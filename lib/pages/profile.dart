@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_empty/widgets/big_text.dart';
-import 'package:flutter_empty/widgets/info_card.dart';
+import 'package:dating_app/widgets/big_text.dart';
+import 'package:dating_app/widgets/info_card.dart';
 
 /* Future fetchProfile() async {
   final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/match'));

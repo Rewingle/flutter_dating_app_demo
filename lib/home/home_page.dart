@@ -4,14 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_empty/home/card_swipe.dart';
-import 'package:flutter_empty/home/card_swipe.dart';
-import 'package:flutter_empty/widgets/big_text.dart';
-import 'package:flutter_empty/widgets/small_text.dart';
+import 'package:dating_app/home/card_swipe.dart';
+import 'package:dating_app/home/card_swipe.dart';
+import 'package:dating_app/widgets/big_text.dart';
+import 'package:dating_app/widgets/small_text.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:flutter_empty/pages/profile.dart';
+import 'package:dating_app/pages/profile.dart';
 import 'package:http/http.dart' as http;
 
 import 'dart:convert';
@@ -91,12 +91,12 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             destinations: [
-              NavigationDestination(icon: Icon(Icons.home), label: 'Swipe'),
+              NavigationDestination(icon: Icon(Icons.home,size: 40,), label: 'SWIPE'),
               NavigationDestination(
-                  icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
+                  icon: Icon(Icons.chat_bubble_rounded,size: 30), label: 'Chat'),
               NavigationDestination(
-                  icon: Icon(Icons.explore), label: 'Discover'),
-              NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+                  icon: Icon(Icons.explore,size: 30), label: 'Discover'),
+              NavigationDestination(icon: Icon(Icons.person,size: 30), label: 'Profile'),
             ],
             selectedIndex: currentPageIndex,
             onDestinationSelected: (int index) {
@@ -113,6 +113,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: <Widget>[
+        
           SwipeCard(),
           const Padding(
             padding: EdgeInsets.all(8.0),
@@ -120,7 +121,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 Card(
                   child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
+                    leading: Icon(Icons.notifications_sharp, size: 30),
                     title: Text('Notification 1'),
                     subtitle: Text('This is a notification'),
                   ),
