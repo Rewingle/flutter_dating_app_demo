@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -24,6 +25,42 @@ class Album {
   }
 }
 
+class Photo {
+  int? id;
+  String? imageUrl;
+  String? userId;
+  Bool? active;
+  String? createdAt;
+}
+
+class User {
+  String? userId;
+  int? id;
+  String? name;
+  String? bod;
+  String? bio;
+  List? photos;
+  String? email;
+  String? password;
+  String? createdAt;
+  String? updatedAt;
+
+  User({this.userId, this.id, this.name, this.bod, this.bio,  this.photos,  this.email, this.password, this.createdAt, this.updatedAt});
+
+  User.fromJson(json) {
+    userId = json['userId'];
+    id = json['id'];
+    name = json['name'];
+    bod = json['bod'];
+    bio = json['bio'];
+    photos = json['photos'];
+    email = json['email'];
+    password = json['password'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+  }
+}
+
 Future<List<Album>> fetchAlbum() async {
   final response =
       await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
@@ -41,6 +78,20 @@ Future<List<Album>> fetchAlbum() async {
   }
 }
 
+Future<List> fetchUsers() async {
+  final response = await http.post(Uri.parse('http://10.0.2.2:5000/api/match'));
+
+  if (response.statusCode == 200) {
+    debugPrint('Success');
+    final body = json.decode(response.body);
+    //debugPrint(body.toString());
+    return body.map((e) => User.fromJson(e)).toList();
+  } else {
+    debugPrint('Failed');
+    throw Exception('Failed to load users');
+  }
+}
+
 Future<List<Album>> albumsFuture = fetchAlbum();
 
 class SwipeCard extends StatefulWidget {
@@ -49,8 +100,11 @@ class SwipeCard extends StatefulWidget {
 }
 
 class SwipeCardState extends State<SwipeCard> {
+  late final Future usersFuture;
+
   @override
   void initState() {
+    usersFuture = fetchUsers();
     super.initState();
   }
 
@@ -90,7 +144,6 @@ class SwipeCardState extends State<SwipeCard> {
     return true;
   }
 
-  void _onDirectionChange(double horizontalDirection) {}
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +155,15 @@ class SwipeCardState extends State<SwipeCard> {
         Flexible(
           child: SizedBox(
               height: cardHeight,
-              child: FutureBuilder<List<Album>>(
-                future: albumsFuture,
+              child: FutureBuilder(
+                future: usersFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    List<Album> albums = snapshot.data!;
-
-                    List<Container> cards = albums
+                    List users = snapshot.data!;
+                    debugPrint(snapshot.data.toString());
+                    List<Container> cards = users
                         .map(
-                          (album) => Container(
+                          (user) => Container(
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -119,7 +172,8 @@ class SwipeCardState extends State<SwipeCard> {
                                 children: [
                                   ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(album.url.toString(),
+                                      child: Image.network(
+                                          user.photos[0]!['imageUrl'],
                                           fit: BoxFit.cover,
                                           height: cardHeight)),
                                   Align(
@@ -143,9 +197,10 @@ class SwipeCardState extends State<SwipeCard> {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                album.title!.toString(),
+                                                user.name!.toString(),
                                                 style: TextStyle(
-                                                    fontSize: 22,
+                                                    fontSize: 24,
+                                                    color: Colors.white,
                                                     fontWeight:
                                                         FontWeight.bold),
                                                 overflow: TextOverflow.ellipsis,
@@ -174,43 +229,39 @@ class SwipeCardState extends State<SwipeCard> {
                                                       color: Colors.black,
                                                       size: 36,
                                                     )),
-                                                
                                                 SizedBox(width: 20),
-                                                
                                                 ElevatedButton(
                                                   onPressed: controller.undo,
-                                                  style: ElevatedButton
-                                                        .styleFrom(
-                                                            shape:
-                                                                CircleBorder(),
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    12),
-                                                            backgroundColor:
-                                                                Colors.white),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                          shape: CircleBorder(),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  12),
+                                                          backgroundColor:
+                                                              Colors.white),
                                                   child: const Icon(
-                                                      Icons.rotate_left,size: 30),
+                                                      Icons.rotate_left,
+                                                      size: 30),
                                                 ),
                                                 SizedBox(width: 4),
                                                 ElevatedButton(
                                                   onPressed: () => controller
                                                       .swipe(CardSwiperDirection
                                                           .top),
-                                                          style: ElevatedButton
-                                                        .styleFrom(
-                                                            shape:
-                                                                CircleBorder(),
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    12),
-                                                            backgroundColor:
-                                                                Colors.white),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                          shape: CircleBorder(),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  12),
+                                                          backgroundColor:
+                                                              Colors.white),
                                                   child: const Icon(
-                                                      Icons.keyboard_arrow_up,size:30),
+                                                      Icons.keyboard_arrow_up,
+                                                      size: 30),
                                                 ),
-                                                
                                                 SizedBox(width: 20),
-                                                
                                                 ElevatedButton(
                                                     onPressed: () =>
                                                         controller.swipe(
@@ -261,7 +312,7 @@ class SwipeCardState extends State<SwipeCard> {
                   } else if (snapshot.hasError) {
                     return Text('${snapshot.error}');
                   }
-                  return const CircularProgressIndicator();
+                  return Container(width:MediaQuery.of(context).size.width,height:cardHeight, child:  Center(child: const CircularProgressIndicator()));
                 },
               )),
         ),
