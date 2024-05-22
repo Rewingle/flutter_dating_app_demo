@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-
+import 'dart:developer';
 /* import 'package:flutter_empty/widgets/big_text.dart';
 import 'package:flutter_empty/widgets/small_text.dart';
  */
@@ -39,6 +39,7 @@ class User {
   String? name;
   String? bod;
   String? bio;
+  int? age;
   List? photos;
   String? email;
   String? password;
@@ -52,6 +53,7 @@ class User {
     id = json['id'];
     name = json['name'];
     bod = json['bod'];
+    age= json['age'];
     bio = json['bio'];
     photos = json['photos'];
     email = json['email'];
@@ -79,12 +81,14 @@ Future<List<Album>> fetchAlbum() async {
 }
 
 Future<List> fetchUsers() async {
-  final response = await http.post(Uri.parse('http://10.0.2.2:5000/api/match'));
+  final String url = 'http://ec2-18-153-207-143.eu-central-1.compute.amazonaws.com:5000';
+  final response = await http.post(Uri.parse('${url}/api/match'));
 
   if (response.statusCode == 200) {
     debugPrint('Success');
     final body = json.decode(response.body);
-    //debugPrint(body.toString());
+    log(body.toString());
+    
     return body.map((e) => User.fromJson(e)).toList();
   } else {
     debugPrint('Failed');
@@ -160,7 +164,7 @@ class SwipeCardState extends State<SwipeCard> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List users = snapshot.data!;
-                    debugPrint(snapshot.data.toString());
+                
                     List<Container> cards = users
                         .map(
                           (user) => Container(
@@ -197,7 +201,7 @@ class SwipeCardState extends State<SwipeCard> {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                user.name!.toString(),
+                                                '${user.name!} | ${user.age!.toString()}',
                                                 style: TextStyle(
                                                     fontSize: 24,
                                                     color: Colors.white,
